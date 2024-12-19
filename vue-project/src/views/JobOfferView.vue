@@ -1,10 +1,14 @@
 <script setup>
+import { useToast } from "vue-toastification";
 import SyncLoader from "vue-spinner/src/SyncLoader.vue";
 import { reactive, onMounted } from "vue";
-import { useRoute, RouterLink } from "vue-router";
+import { useRoute, useRouter, RouterLink } from "vue-router";
+import BackButton from "@/components/BackButton.vue";
 import axios from "axios";
 
 const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 
 const jobID = route.params.id;
 
@@ -12,6 +16,22 @@ const state = reactive({
   job: {},
   isLoading: true,
 });
+
+const deleteJob = async () => {
+  try {
+    const confirm = window.confirm("Are you sure you want to delete this Job?");
+    if (!confirm) {
+      console.log("error");
+    } else {
+      await axios.delete(`/api/jobs/${jobID}`);
+      toast.success("Job Deleted Successfully");
+      router.push("/jobs");
+    }
+  } catch (error) {
+    console.error("Error Deleting Job", error);
+    toast.error("Job is Not Deleted");
+  }
+};
 
 onMounted(async () => {
   try {
@@ -25,6 +45,7 @@ onMounted(async () => {
 });
 </script>
 <template>
+  <BackButton />
   <section v-if="!state.isLoading" class="bg-green-50">
     <div class="container m-auto py-10 px-6">
       <div class="grid grid-cols-[70%,30%] w-full gap-6">
@@ -71,7 +92,7 @@ onMounted(async () => {
 
             <h3 class="text-xl">Contact Phone:</h3>
             <p class="my-2 bg-green-100 p-2 font-bold">
-              {{ state.job.company.contactEmail }}
+              {{ state.job.company.contactPhone }}
             </p>
           </div>
 
@@ -83,6 +104,7 @@ onMounted(async () => {
               >Edit Job</RouterLink
             >
             <button
+              @click="deleteJob"
               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block">
               Delete Job
             </button>

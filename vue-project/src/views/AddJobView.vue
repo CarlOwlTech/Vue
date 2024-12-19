@@ -1,9 +1,57 @@
+<script setup>
+import router from "@/router";
+import { reactive } from "vue";
+import { useToast } from "vue-toastification";
+import axios from "axios";
+
+const form = reactive({
+  type: "Full-Time",
+  title: "",
+  description: "",
+  salary: "",
+  location: "",
+  company: {
+    name: "",
+    description: "",
+    contactEmail: "",
+    contactPhone: "",
+  },
+});
+
+const handleSubmit = async () => {
+  const newJob = {
+    title: form.title,
+    type: form.type,
+    location: form.location,
+    description: form.description,
+    salary: form.salary,
+    company: {
+      name: form.company.name,
+      description: form.company.description,
+      contactEmail: form.company.contactEmail,
+      contactPhone: form.company.contactPhone,
+    },
+  };
+
+  const toast = useToast();
+
+  try {
+    const response = await axios.post(`/api/jobs/`, newJob);
+    toast.success("Job Added Successfull!");
+    router.push(`/jobs/${response.data.id}`);
+  } catch (error) {
+    console.log("Error Fetching Data", error);
+    toast.error("Job Was Not Added!");
+  }
+};
+</script>
+
 <template>
   <section class="bg-green-50">
     <div class="container m-auto max-w-2xl py-24">
       <div
         class="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
-        <form>
+        <form @submit.prevent="handleSubmit">
           <h2 class="text-3xl text-center font-semibold mb-6">Add Job</h2>
 
           <div class="mb-4">
@@ -11,6 +59,7 @@
               >Job Type</label
             >
             <select
+              v-model="form.type"
               id="type"
               name="type"
               class="border rounded w-full py-2 px-3"
@@ -27,6 +76,7 @@
               >Job Listing Name</label
             >
             <input
+              v-model="form.title"
               type="text"
               id="name"
               name="name"
@@ -39,6 +89,7 @@
               >Description</label
             >
             <textarea
+              v-model="form.description"
               id="description"
               name="description"
               class="border rounded w-full py-2 px-3"
@@ -51,6 +102,7 @@
               >Salary</label
             >
             <select
+              v-model="form.salary"
               id="salary"
               name="salary"
               class="border rounded w-full py-2 px-3"
@@ -72,6 +124,7 @@
           <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2"> Location </label>
             <input
+              v-model="form.location"
               type="text"
               id="location"
               name="location"
@@ -87,6 +140,7 @@
               >Company Name</label
             >
             <input
+              v-model="form.company.name"
               type="text"
               id="company"
               name="company"
@@ -101,6 +155,7 @@
               >Company Description</label
             >
             <textarea
+              v-model="form.company.description"
               id="company_description"
               name="company_description"
               class="border rounded w-full py-2 px-3"
@@ -115,6 +170,7 @@
               >Contact Email</label
             >
             <input
+              v-model="form.company.contactEmail"
               type="email"
               id="contact_email"
               name="contact_email"
@@ -129,6 +185,7 @@
               >Contact Phone</label
             >
             <input
+              v-model="form.company.contactPhone"
               type="tel"
               id="contact_phone"
               name="contact_phone"
